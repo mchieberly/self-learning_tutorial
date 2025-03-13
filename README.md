@@ -1,2 +1,2 @@
-# self-learning_tutorial
+# Self-Learning Tutorial
 Deep learning project with MIMIC-III demo dataset
