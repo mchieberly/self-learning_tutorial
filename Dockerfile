@@ -1,17 +1,42 @@
-e the official PyTorch image
-FROM pytorch/pytorch:latest
+e an image with CUDA and Ubuntu (for GPU support, modify accordingly)
+FROM nvidia/cuda:12.6.2-cudnn-runtime-ubuntu24.04
+
+# Install basic utilities
+RUN apt-get update && apt-get install -y wget git vim libglib2.0-0 libgl1
+
+# Download and install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
+    rm Miniconda3-latest-Linux-x86_64.sh
+
+# Set the path to conda
+ENV PATH /opt/miniconda/bin:$PATH
 
 # Set working directory
-WORKDIR /app
+WORKDIR /workspace
 
-# Copy requirements and install dependencies
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . /opt/mimicdl
 
-# Copy source code into container
-COPY src/ src/
-COPY data/ data/
+# Run the setup script
+RUN /bin/bash -c " \
+	conda init bash && \
+	source ~/.bashrc && \
+	conda env create -n mimicdl"
 
-# Set the default command
-CMD ["python", "src/train.py"]
+# Keep the container running
+CMD ["tail", "-f", "/dev/null"]
+
+# When ready to set up RunPod, from '~/dev/self-learning_tutorial', run:
+# `docker build -t mchieberly/mimicdl:latest .`
+# `docker push mchieberly/mimicdl:latest`
+
+# When in the container, run:
+# `cd /opt/mimicdl`
+# `conda activate mimicdl`
+# `pip install opencv-python`
+
+# pip install -r requirements
+# reinstall torch modules?
+# add github ssh key
+# pull latest git changes
 
