@@ -9,7 +9,7 @@ from src.preprocess import load_data
 from src.utils import save_model, Timer
 
 EPOCHS = 1000
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.01
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 BATCH_SIZE = 32

@@ -2,13 +2,22 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+nan_counter = 0
+overflow_counter = 0
+over_300_counter = 0
+other_counter = 0
+
 def calc_age(row):
     """Compute age at ICU admission safely, adjusting dob if necessary."""
+
+    global nan_counter, overflow_counter, over_300_counter, other_counter
+
     intime = row["intime"]
     dob = row["dob"]
 
     # If either date is missing, return NaN
     if pd.isnull(intime) or pd.isnull(dob):
+        nan_counter += 1
         return np.nan
 
     # Convert to python datetime objects to avoid overflow issues
@@ -16,6 +25,7 @@ def calc_age(row):
         dt_intime = intime.to_pydatetime()
         dt_dob = dob.to_pydatetime()
     except Exception:
+        nan_counter += 1
         return np.nan
 
     # If dob is in the future relative to intime, assume it needs to be shifted 100 years back.
@@ -27,16 +37,21 @@ def calc_age(row):
         age = (dt_intime - dt_dob).days / 365.25
     except OverflowError:
         # In case of an overflow, set age to 90 (as for de-identified patients)
+        overflow_counter += 1
         return 90.0
 
     # If age is 300 or more (de-identified patients), set to 90
     if age >= 300:
+        over_300_counter += 1
         return 90.0
 
+    other_counter += 1
     return age
 
 def load_data():
     """Load and preprocess MIMIC-III demo dataset."""
+
+    global nan_counter, overflow_counter, over_300_counter, other_counter
 
     # Define column data types using nullable Int32 for integer columns
     dtype_dict = {
@@ -121,5 +136,7 @@ def load_data():
     # Filter to only existing columns in the pivot
     existing_cols = [col for col in numeric_features if col in df.columns]
     df[existing_cols] = scaler.fit_transform(df[existing_cols])
+
+    print(f'nan_counter={nan_counter}, overflow_counter={overflow_counter}, over_300_counter={over_300_counter}, other_counter={other_counter}')
 
     return df
