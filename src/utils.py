@@ -6,7 +6,6 @@ utils.py
 import time
 import torch
 import numpy as np
-from sklearn.preprocessing import StandardScaler
 
 class Timer:
     """Timer utility"""
