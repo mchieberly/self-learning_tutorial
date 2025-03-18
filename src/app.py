@@ -20,13 +20,13 @@ model = load_model(ICU_LOS_Model, "models/icu_los_model.pth")
 # Define feature names and display labels for Gradio
 DATA_FEATURES = ["age", "gender", "heart_rate", "blood_pressure", "temperature", "spo2", "respiratory_rate"]
 DISPLAY_FEATURES = [
-    "Age",
+    "Age (years)",
     "Gender (0=M, 1=F)",
-    "Heart Rate",
-    "Blood Pressure",
-    "Temperature (F)",
-    "SpO2",
-    "Respiratory Rate"
+    "Heart Rate (bpm)",
+    "Blood Pressure (mmHg)",
+    "Temperature (°F)",
+    "SpO2 (%)",
+    "Respiratory Rate (breaths/min)"
 ]
 
 # Load data and fit scaler

@@ -3,7 +3,6 @@ Malachi Eberly
 model.py
 """
 
-import torch
 import torch.nn as nn
 
 class ICU_LOS_Model(nn.Module):
