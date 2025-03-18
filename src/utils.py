@@ -3,20 +3,10 @@ Malachi Eberly
 utils.py
 """
 
-import logging
 import time
 import torch
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-
-def setup_logger(log_file="logs.txt"):
-    """Logger setup"""
-    logging.basicConfig(
-        filename=log_file,
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-    return logging.getLogger(__name__)
 
 class Timer:
     """Timer utility"""
@@ -46,6 +36,6 @@ def load_model(model_class, path="models/icu_los_model.pth", input_dim=7):
     return model
 
 def normalize_input(user_input, scaler):
-    """Normalize input"""
+    """Normalize input using a given scaler"""
     user_input = np.array(user_input).reshape(1, -1)
     return scaler.transform(user_input)
