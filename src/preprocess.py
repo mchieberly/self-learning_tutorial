@@ -12,8 +12,8 @@ def calc_age(row):
 
     global nan_counter, overflow_counter, over_300_counter, other_counter
 
-    intime = row["intime"]
-    dob = row["dob"]
+    intime = row["INTIME"]
+    dob = row["DOB"]
 
     # If either date is missing, return NaN
     if pd.isnull(intime) or pd.isnull(dob):
@@ -55,18 +55,18 @@ def load_data():
 
     # Define column data types using nullable Int32 for integer columns
     dtype_dict = {
-        "subject_id": "Int32",
-        "hadm_id": "Int32",
-        "icustay_id": "Int32",
-        "los": "float32",
-        "gender": "category",
-        "itemid": "Int32",
-        "valuenum": "float32",
-        "dob": "string"  # Will parse separately
+        "SUBJECT_ID": "Int32",
+        "HADM_ID": "Int32",
+        "ICUSTAY_ID": "Int32",
+        "LOS": "float32",
+        "GENDER": "category",
+        "ITEMID": "Int32",
+        "VALUENUM": "float32",
+        "DOB": "string"
     }
 
-    # Read CSV files; parse 'intime' in icustays and keep dob as string for patients
-    icustays = pd.read_csv("data/ICUSTAYS.csv", dtype=dtype_dict, parse_dates=["intime"], low_memory=False)
+    # Read CSV files; parse 'INTIME' in icustays and keep dob as string for patients
+    icustays = pd.read_csv("data/ICUSTAYS.csv", dtype=dtype_dict, parse_dates=["INTIME"], low_memory=False)
     patients = pd.read_csv("data/PATIENTS.csv", dtype=dtype_dict, low_memory=False)
     vitals = pd.read_csv("data/CHARTEVENTS.csv", dtype=dtype_dict, low_memory=False)
 
@@ -76,32 +76,32 @@ def load_data():
     vitals.columns = vitals.columns.str.lower()
 
     # Parse patients' dob to datetime
-    patients["dob"] = pd.to_datetime(patients["dob"], errors="coerce")
+    patients["DOB"] = pd.to_datetime(patients["DOB"], errors="coerce")
 
     # Fill missing values in integer columns before merging
-    icustays.fillna({"icustay_id": -1}, inplace=True)
-    patients.fillna({"subject_id": -1}, inplace=True)
-    vitals.fillna({"icustay_id": -1, "itemid": -1}, inplace=True)
+    icustays.fillna({"ICUSTAY_ID": -1}, inplace=True)
+    patients.fillna({"SUBJECT_ID": -1}, inplace=True)
+    vitals.fillna({"ICUSTAY_ID": -1, "ITEMID": -1}, inplace=True)
 
     # Merge icustays with patients to bring in dob for age calculation
-    icustays = icustays.merge(patients[["subject_id", "dob"]], on="subject_id", how="left")
+    icustays = icustays.merge(patients[["SUBJECT_ID", "DOB"]], on="SUBJECT_ID", how="left")
 
     # Calculate age at ICU admission and enforce float32 type
-    icustays["age"] = icustays.apply(calc_age, axis=1).astype("float32")
+    icustays["AGE"] = icustays.apply(calc_age, axis=1).astype("float32")
 
     # Merge icustays with patients to bring in gender information
-    df = icustays.merge(patients[["subject_id", "gender"]], on="subject_id", how="left")
+    df = icustays.merge(patients[["SUBJECT_ID", "GENDER"]], on="SUBJECT_ID", how="left")
 
     # Select relevant columns
-    df = df[["subject_id", "hadm_id", "icustay_id", "los", "age", "gender"]]
+    df = df[["SUBJECT_ID", "HADM_ID", "ICUSTAY_ID", "LOS", "AGE", "GENDER"]]
 
     # Convert categorical gender to numeric
-    df["gender"] = df["gender"].map({"M": 0, "F": 1}).astype("Int32")
+    df["GENDER"] = df["GENDER"].map({"M": 0, "F": 1}).astype("Int32")
 
     # Extract vitals from CHARTEVENTS using a pivot table
-    vitals_pivot = vitals.pivot_table(index="icustay_id",
-                                      columns="itemid",
-                                      values="valuenum",
+    vitals_pivot = vitals.pivot_table(index="ICUSTAY_ID",
+                                      columns="ITEMID",
+                                      values="VALUENUM",
                                       aggfunc="mean").reset_index()
 
     # Updated itemid mapping:
@@ -120,7 +120,7 @@ def load_data():
     vitals_pivot.rename(columns=vitals_map, inplace=True)
 
     # Merge vitals with patient data
-    df = df.merge(vitals_pivot, on="icustay_id", how="left")
+    df = df.merge(vitals_pivot, on="ICUSTAY_ID", how="left")
 
     # If you want to convert temperature from Fahrenheit to Celsius, uncomment:
     # if "temperature" in df.columns:

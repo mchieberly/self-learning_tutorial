@@ -8,7 +8,7 @@ from src.model import ICU_LOS_Model
 from src.preprocess import load_data
 from src.utils import save_model, Timer
 
-EPOCHS = 1000
+EPOCHS = 100
 LEARNING_RATE = 0.01
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
