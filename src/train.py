@@ -1,3 +1,8 @@
+"""
+Malachi Eberly
+train.py
+"""
+
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -14,10 +19,8 @@ TEST_SIZE = 0.2
 RANDOM_STATE = 42
 BATCH_SIZE = 32
 
-# Define PyTorch Dataset
 class ICUDataset(Dataset):
     def __init__(self, X, y):
-        # Ensure that X and y are float32 numpy arrays
         self.X = torch.tensor(X.astype(np.float32), dtype=torch.float32)
         self.y = torch.tensor(y.astype(np.float32), dtype=torch.float32)
 
@@ -31,7 +34,6 @@ class ICUDataset(Dataset):
 print("Loading data...")
 df = load_data()
 
-# Our numeric features
 feature_columns = [
     "age", "gender", "heart_rate", "blood_pressure", 
     "temperature", "spo2", "respiratory_rate"
@@ -45,7 +47,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
 )
 
-# Convert to PyTorch dataset
+# Convert to ICUDataset
 print("Converting to ICUDataset with PyTorch tensors...")
 train_dataset = ICUDataset(X_train, y_train)
 test_dataset = ICUDataset(X_test, y_test)
@@ -73,7 +75,7 @@ for epoch in range(EPOCHS):
         optimizer.step()
         running_loss += loss.item()
 
-    # Simple progress printing
+    # Log training epochs
     if (epoch + 1) % 10 == 0:
         print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {running_loss/len(train_loader):.4f}")
 timer.stop()

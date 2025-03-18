@@ -1,3 +1,8 @@
+"""
+Malachi Eberly
+app.py
+"""
+
 import gradio as gr
 import torch
 import numpy as np
@@ -6,12 +11,14 @@ from src.preprocess import load_data
 from src.utils import load_model, normalize_input
 from sklearn.preprocessing import StandardScaler
 
-# Load trained model (using the MLP-based model; input_dim remains 7)
-model = load_model(ICU_LOS_Model, "models/icu_los_model.pth", input_dim=7)
+SERVER_NAME = "0.0.0.0"
+SERVER_PORT = 7860
 
-# Define feature names:
+# Load trained model
+model = load_model(ICU_LOS_Model, "models/icu_los_model.pth")
+
+# Define feature names and display labels for Gradio
 DATA_FEATURES = ["age", "gender", "heart_rate", "blood_pressure", "temperature", "spo2", "respiratory_rate"]
-# Display labels in Gradio:
 DISPLAY_FEATURES = [
     "Age",
     "Gender (0=M, 1=F)",
@@ -22,7 +29,7 @@ DISPLAY_FEATURES = [
     "Respiratory Rate"
 ]
 
-# Load data and fit scaler on the actual dataframe features
+# Load data and fit scaler
 df = load_data()
 scaler = StandardScaler()
 scaler.fit(df[DATA_FEATURES])
@@ -33,7 +40,6 @@ def predict_los(*user_inputs):
     user_array = np.array(user_inputs).reshape(1, -1)
     # Normalize
     user_scaled = normalize_input(user_array, scaler)
-    # PyTorch
     input_tensor = torch.tensor(user_scaled, dtype=torch.float32)
     with torch.no_grad():
         prediction = model(input_tensor).item()
@@ -51,4 +57,4 @@ interface = gr.Interface(
 )
 
 if __name__ == "__main__":
-    interface.launch(server_name="0.0.0.0", server_port=7860)
+    interface.launch(server_name=SERVER_NAME, server_port=SERVER_PORT)

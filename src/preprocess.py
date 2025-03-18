@@ -1,3 +1,8 @@
+"""
+Malachi Eberly
+preprocess.py
+"""
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -36,11 +41,11 @@ def calc_age(row):
     try:
         age = (dt_intime - dt_dob).days / 365.25
     except OverflowError:
-        # In case of an overflow, set age to 90 (as for de-identified patients)
+        # In case of an overflow, set age to 90
         overflow_counter += 1
         return 90.0
 
-    # If age is 300 or more (de-identified patients), set to 90
+    # If age is 300 or more, set to 90
     if age >= 300:
         over_300_counter += 1
         return 90.0
@@ -62,10 +67,10 @@ def load_data():
         "gender": "category",
         "itemid": "Int32",
         "valuenum": "float32",
-        "dob": "string"  # Will parse separately
+        "dob": "string"
     }
 
-    # Read CSV files; parse 'intime' in icustays and keep dob as string for patients
+    # Read CSV files
     icustays = pd.read_csv("data/ICUSTAYS.csv", dtype=dtype_dict, parse_dates=["intime"], low_memory=False)
     patients = pd.read_csv("data/PATIENTS.csv", dtype=dtype_dict, low_memory=False)
     vitals = pd.read_csv("data/CHARTEVENTS.csv", dtype=dtype_dict, low_memory=False)
@@ -104,12 +109,6 @@ def load_data():
                                       values="valuenum",
                                       aggfunc="mean").reset_index()
 
-    # Updated itemid mapping:
-    #   220045: heart rate
-    #   223761: temperature (Fahrenheit)
-    #   220277: spo2
-    #   220210: respiratory_rate
-    #   220179: arterial systolic (using it as "blood_pressure" for demo)
     vitals_map = {
         220045: "heart_rate",
         223761: "temperature",
@@ -122,18 +121,12 @@ def load_data():
     # Merge vitals with patient data
     df = df.merge(vitals_pivot, on="icustay_id", how="left")
 
-    # If you want to convert temperature from Fahrenheit to Celsius, uncomment:
-    # if "temperature" in df.columns:
-    #     df["temperature"] = (df["temperature"] - 32) * (5.0 / 9.0)
-
-    # Handle missing values (fill with median for numeric columns)
+    # Handle missing values by filling with median for numeric columns
     df.fillna(df.median(numeric_only=True), inplace=True)
 
     # Normalize continuous features
     scaler = StandardScaler()
-    # Make sure these columns exist in the pivot
     numeric_features = ["age", "heart_rate", "blood_pressure", "temperature", "spo2", "respiratory_rate"]
-    # Filter to only existing columns in the pivot
     existing_cols = [col for col in numeric_features if col in df.columns]
     df[existing_cols] = scaler.fit_transform(df[existing_cols])
 
