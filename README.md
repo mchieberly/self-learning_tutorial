@@ -7,6 +7,6 @@ Model that takes in vitals information as input and outputs a predicted length o
 Install packages in requirements.txt
 
 ## Train and Run
-`python -m src.train`
-`python -m src.app`
-Nagivate to "http://127.0.0.1:7860/"
+`python -m src.train`<br />
+`python -m src.app`<br />
+Nagivate to "http://127.0.0.1:7860/"<br />
